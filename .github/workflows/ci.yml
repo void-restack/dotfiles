@@ -13,7 +13,7 @@ jobs:
       - name: Install ansible dependencies
         run: |
           pip install ansible ansible-lint
-          ansible-galaxy install -r ansible/requirements.yml
+          ansible-galaxy install -r requirements.yml
         working-directory: ansible
       - name: Run ansible-lint
         run: ansible-lint
@@ -26,7 +26,7 @@ jobs:
       - uses: ludeeus/action-shellcheck@master
         with:
           severity: warning
-          ignore_paths: .chezmoiscripts,private_dot_config/zsh
+          ignore_paths: .chezmoiscripts private_dot_config/zsh
 
   chezmoi-validate:
     runs-on: ubuntu-latest
