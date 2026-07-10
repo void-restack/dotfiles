@@ -10,11 +10,12 @@
     state: present
 
 - name: Set timezone
-  ansible.builtin.timezone:
+  community.general.timezone:
     name: "{{ timezone }}"
 
 - name: Create swap file if none exists
   ansible.builtin.shell: |
+    set -o pipefail
     if [ $(swapon --show | wc -l) -eq 0 ]; then
       fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
       echo '/swapfile none swap sw 0 0' >> /etc/fstab
@@ -25,6 +26,9 @@
 - name: Configure unattended-upgrades for security updates
   ansible.builtin.copy:
     dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    owner: root
+    group: root
+    mode: '0644'
     content: |
       Unattended-Upgrade::Allowed-Origins {
         "${distro_id}:${distro_codename}-security";

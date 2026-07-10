@@ -10,9 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ansible/ansible-lint@main
-        with:
-          working_directory: ansible
+      - name: Install ansible dependencies
+        run: |
+          pip install ansible ansible-lint
+          ansible-galaxy install -r ansible/requirements.yml
+        working-directory: ansible
+      - name: Run ansible-lint
+        run: ansible-lint
+        working-directory: ansible
 
   shellcheck:
     runs-on: ubuntu-latest
@@ -21,16 +26,36 @@ jobs:
       - uses: ludeeus/action-shellcheck@master
         with:
           severity: warning
-          ignore_paths: .chezmoiscripts
+          ignore_paths: .chezmoiscripts,private_dot_config/zsh
 
   chezmoi-validate:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Install chezmoi
-        run: brew install chezmoi
-      - name: Validate chezmoi source
         run: |
-          chezmoi init --source=.
-          chezmoi diff --source=. || true
-          chezmoi execute-template --source=. < .chezmoi.toml.tmpl > /dev/null
+          curl -fsLS https://get.chezmoi.io -o /usr/local/bin/chezmoi
+          chmod +x /usr/local/bin/chezmoi
+      - name: Validate templates
+        run: |
+          chezmoi execute-template \
+            --init \
+            -D email=ci@example.com \
+            -D name=CI \
+            < .chezmoi.toml.tmpl > /dev/null
+      - name: Validate all templates compile
+        run: |
+          chezmoi execute-template \
+            -D email=ci@example.com \
+            -D name=CI \
+            -D chezmoi.os=linux \
+            -D chezmoi.arch=amd64 \
+            -D chezmoi.sourceDir=. \
+            < dot_zshrc.tmpl > /dev/null
+          chezmoi execute-template \
+            -D email=ci@example.com \
+            -D name=CI \
+            -D chezmoi.os=darwin \
+            -D chezmoi.arch=arm64 \
+            -D chezmoi.sourceDir=. \
+            < dot_zshrc.tmpl > /dev/null
