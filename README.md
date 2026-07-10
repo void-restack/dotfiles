@@ -73,16 +73,36 @@ dotfiles/
 
 ## Ansible server provisioning
 
-```bash
-# Provision a new Debian server
-ansible-playbook ansible/playbooks/provision-server.yml \
-  -e "target=<ip>" -e "ansible_user=<default_user>"
+### One-time setup
 
-# Update all servers
+```bash
+brew install ansible
+cd ~/dotfiles/ansible
+ansible-galaxy install -r requirements.yml
+ansible-vault encrypt inventory/group_vars/vault.yml  # set your GCP project ID
+gcloud compute config-ssh  # populates ~/.ssh/config with GCP host aliases
+```
+
+### Provision a new GCP server
+
+```bash
+# 1. Create the VM (console or gcloud)
+gcloud compute instances create my-server --zone=asia-south1-a --image-family=debian-12 --image-project=debian-cloud
+
+# 2. Refresh SSH config + dynamic inventory
+gcloud compute config-ssh
+
+# 3. Provision
+ansible-playbook ansible/playbooks/provision-server.yml -e "target=my-server"
+```
+
+### Update all servers
+
+```bash
 ansible-playbook ansible/playbooks/update-all.yml
 ```
 
-See `ansible/` for details.
+The `gcp_compute` dynamic inventory plugin auto-discovers your running GCP instances — no manual inventory maintenance.
 
 ## Daily operations
 

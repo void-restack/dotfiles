@@ -1,0 +1,16 @@
+plugin: gcp_compute
+projects:
+  - "{{ gcp_project_id }}"
+zones:
+  - asia-south1-a
+  - asia-south1-b
+filters: []
+auth_kind: application
+groups:
+  - name: debian_servers
+    filters:
+      - "status == RUNNING"
+hostnames:
+  - name
+compose:
+  ansible_user: debian
