@@ -7,7 +7,7 @@
     - base
     - user
     - role: geerlingguy.docker
-    - role: devsec.ssh_hardening
+    - role: devsec.hardening.ssh_hardening
     - role: geerlingguy.firewall
   vars:
     # geerlingguy.docker
