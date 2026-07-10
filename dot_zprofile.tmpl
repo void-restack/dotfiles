@@ -1,0 +1,7 @@
+{{ if eq .chezmoi.os "darwin" -}}
+# OrbStack
+source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+{{ end -}}
+
+# Local bin
+export PATH="$HOME/.local/bin:$PATH"
