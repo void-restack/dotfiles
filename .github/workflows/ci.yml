@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ansible-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ansible/ansible-lint@main
+        with:
+          working_directory: ansible
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ludeeus/action-shellcheck@master
+        with:
+          severity: warning
+          ignore_paths: .chezmoiscripts
+
+  chezmoi-validate:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install chezmoi
+        run: brew install chezmoi
+      - name: Validate chezmoi source
+        run: |
+          chezmoi init --source=.
+          chezmoi diff --source=. || true
+          chezmoi execute-template --source=. < .chezmoi.toml.tmpl > /dev/null

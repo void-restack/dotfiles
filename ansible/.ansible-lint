@@ -1,0 +1,13 @@
+---
+exclude_paths:
+  - .git
+  - .github
+  - inventory
+
+warn_list:
+  - experimental
+  - fqcn[action]
+
+skip_list:
+  - yaml[document-start]
+  - name[casing]
