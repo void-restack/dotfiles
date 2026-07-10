@@ -1,0 +1,39 @@
+---
+deploy_user: deploy
+deploy_user_shell: /bin/bash
+deploy_user_groups:
+  - sudo
+  - docker
+
+deploy_authorized_keys:
+  - "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/void.pub') }}"
+  - "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_ed25519.pub') }}"
+
+ufw_allowed_tcp_ports:
+  - 22
+  - 80
+  - 443
+
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+timezone: Asia/Kolkata
+
+base_packages:
+  - curl
+  - wget
+  - git
+  - vim
+  - htop
+  - ufw
+  - fail2ban
+  - apt-transport-https
+  - ca-certificates
+  - gnupg
+  - python3
+  - python3-pip
+  - unattended-upgrades

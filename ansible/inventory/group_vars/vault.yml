@@ -1,0 +1,4 @@
+---
+# Encrypt with: ansible-vault encrypt inventory/group_vars/vault.yml
+# Contains sensitive variables like GCP project IDs, API tokens, etc.
+# gcp_project_id: your-project-id
