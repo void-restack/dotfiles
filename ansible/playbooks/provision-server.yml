@@ -1,6 +1,6 @@
 ---
 - name: Provision a fresh Debian server
-  hosts: "{{ target }}"
+  hosts: "{{ target | default('all') }}"
   become: true
   gather_facts: true
   roles:
