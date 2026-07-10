@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -e
+
+{{ if eq .chezmoi.os "darwin" -}}
+# Install Homebrew if not present
+if ! command -v brew &>/dev/null; then
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+brew bundle --file=- <<EOF
+brew "age"
+brew "atuin"
+brew "bat"
+brew "btop"
+brew "chezmoi"
+brew "curlie"
+brew "delta"
+brew "direnv"
+brew "fd"
+brew "fzf"
+brew "gh"
+brew "git"
+brew "git-delta"
+brew "go"
+brew "harlequin"
+brew "jq"
+brew "lazygit"
+brew "neovim"
+brew "ripgrep"
+brew "rustup-init"
+brew "tree"
+brew "tmux"
+brew "volta"
+brew "zoxide"
+brew "zsh"
+
+cask "kitty"
+cask "orbstack"
+EOF
+
+{{ else if eq .chezmoi.os "linux" -}}
+# Debian/Ubuntu
+sudo apt update && sudo apt install -y \
+  bat fd-find fzf git jq neovim ripgrep tmux tree zsh curl wget htop ufw fail2ban
+
+# Create symlinks for renamed packages
+sudo ln -sf $(which fdfind) /usr/local/bin/fd 2>/dev/null || true
+sudo ln -sf $(which batcat) /usr/local/bin/bat 2>/dev/null || true
+{{ end -}}
