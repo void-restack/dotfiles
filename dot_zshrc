@@ -1,0 +1,294 @@
+export ZSH="$HOME/.oh-my-zsh"
+
+ZSH_THEME=""
+
+plugins=(
+  git
+  volta
+  sudo
+  copypath
+  copyfile
+  copybuffer
+  extract
+  encode64
+  colored-man-pages
+  history-substring-search
+  web-search
+  macos
+  brew
+  gh
+  golang
+  docker
+  docker-compose
+  fzf-tab
+  zsh-autosuggestions
+  fast-syntax-highlighting
+)
+
+fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
+
+source $ZSH/oh-my-zsh.sh
+
+# ───────────────────────────────────────────────────────────────
+# Custom Prompt (Tokyo Night)
+# ───────────────────────────────────────────────────────────────
+autoload -Uz colors
+colors
+
+typeset -g tn_fg="#c0caf5"
+typeset -g tn_blue="#7aa2f7"
+typeset -g tn_green="#9ece6a"
+typeset -g tn_red="#f7768e"
+typeset -g tn_yellow="#e0af68"
+typeset -g tn_purple="#bb9af7"
+typeset -g tn_gray="#565f89"
+
+precmd() {
+  if git rev-parse --is-inside-work-tree &>/dev/null; then
+    local branch=$(git branch --show-current 2>/dev/null || git rev-parse --short HEAD)
+    local git_info="%F{$tn_gray}$branch%f"
+
+    local upstream=$(git rev-parse --abbrev-ref '@{upstream}' 2>/dev/null)
+    if [[ -n $upstream && $upstream != '@{upstream}' ]]; then
+      local ahead=$(git rev-list --count '@{upstream}..HEAD' 2>/dev/null)
+      local behind=$(git rev-list --count 'HEAD..@{upstream}' 2>/dev/null)
+      [[ $ahead -gt 0 ]] && git_info+=" %F{$tn_yellow}↑${ahead}%f"
+      [[ $behind -gt 0 ]] && git_info+=" %F{$tn_blue}↓${behind}%f"
+    fi
+
+    local staged=$(git diff --cached --name-only 2>/dev/null | wc -l | tr -d ' ')
+    local changed=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
+    local untracked=$(git ls-files --others --exclude-standard 2>/dev/null | wc -l | tr -d ' ')
+    [[ $staged -gt 0 ]] && git_info+=" %F{$tn_green}+${staged}%f"
+    [[ $changed -gt 0 ]] && git_info+=" %F{$tn_yellow}!${changed}%f"
+    [[ $untracked -gt 0 ]] && git_info+=" %F{$tn_red}?${untracked}%f"
+
+    RPROMPT="${git_info}%(?.. %F{$tn_red}exit %?%f)"
+  else
+    RPROMPT="%(?..%F{$tn_red}exit %?%f)"
+  fi
+}
+
+PROMPT="%F{$tn_blue}%c%f %(?.%F{$tn_gray}.%F{$tn_red})❯%f "
+
+# ───────────────────────────────────────────────────────────────
+# History
+# ───────────────────────────────────────────────────────────────
+HISTSIZE=100000
+SAVEHIST=100000
+HISTFILE=~/.zsh_history
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt SHARE_HISTORY
+setopt EXTENDED_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+
+# ───────────────────────────────────────────────────────────────
+# Shell Options
+# ───────────────────────────────────────────────────────────────
+setopt AUTO_CD
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+setopt CORRECT
+setopt INTERACTIVE_COMMENTS
+setopt NO_BEEP
+
+# ───────────────────────────────────────────────────────────────
+# Editor
+# ───────────────────────────────────────────────────────────────
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='nvim'
+fi
+
+# ───────────────────────────────────────────────────────────────
+# PATH
+# ───────────────────────────────────────────────────────────────
+export PATH="$HOME/.local/bin:$PATH"
+
+# Bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Go
+export PATH="$PATH:/usr/local/go/bin"
+
+# Volta
+export VOLTA_HOME="$HOME/.volta"
+export PATH="$VOLTA_HOME/bin:$PATH"
+
+# pnpm
+export PNPM_HOME="$HOME/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+
+# Cargo
+. "$HOME/.cargo/env"
+
+# Ruby / Kamal (Homebrew)
+export PATH="/opt/homebrew/opt/ruby/bin:/opt/homebrew/lib/ruby/gems/4.0.0/bin:$PATH"
+
+# Turbo CLI
+export PATH="$HOME/.goldsky/bin:$PATH"
+
+# opencode
+export PATH="$HOME/.opencode/bin:$PATH"
+
+# Antigravity
+export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
+
+# Java / Android / libpq
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+export ANDROID_HOME="/opt/homebrew/share/android-commandlinetools"
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator"
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
+ulimit -n 524288
+
+# ───────────────────────────────────────────────────────────────
+# Aliases
+# ───────────────────────────────────────────────────────────────
+alias lg='lazygit'
+alias curl="curlie"
+alias vim="nvim"
+alias vi="nvim"
+alias hq="harlequin"
+
+alias ll='ls -lah'
+alias la='ls -A'
+alias lt='tree -L 2'
+
+export BAT_THEME="tokyonight_night"
+export BAT_STYLE="plain"
+export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+alias cat='bat --paging=never'
+alias find='fd'
+alias grep='rg'
+
+alias ssh='kitty +kitten ssh'
+alias d='kitty +kitten diff'
+alias icat='kitty +kitten icat'
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias /='cd /'
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+alias zshrc="$EDITOR ~/.zshrc"
+alias reload='exec zsh'
+
+alias ds='du -sh *(/)'
+alias usage='du -sh * | sort -h'
+
+alias myip='curl -s ifconfig.me'
+alias localip='ipconfig getifaddr en0'
+
+# ───────────────────────────────────────────────────────────────
+# Functions
+# ───────────────────────────────────────────────────────────────
+mkcd() { mkdir -p "$1" && cd "$1"; }
+
+fh() { print -z "$(history -n 2>/dev/null | fzf --tac --query="$1")"; }
+
+killport() {
+  local force=""
+  local -a ports
+  for arg in "$@"; do
+    [[ "$arg" == (-f|--force|-9) ]] && { force="-9"; continue; }
+    ports+=("$arg")
+  done
+
+  if (( ${#ports[@]} == 0 )); then
+    echo "Usage: killport [-f|-9] <port> [port...]" >&2
+    return 1
+  fi
+
+  local -a pids
+  for port in "${ports[@]}"; do
+    if ! [[ "$port" =~ '^[0-9]+$' ]] || (( port < 1 || port > 65535 )); then
+      print -u2 "skipping invalid port: $port"
+      continue
+    fi
+    local -a port_pids
+    port_pids=( "${(@f)$(lsof -nP -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null)}" )
+    if (( ${#port_pids[@]} == 0 )); then
+      print "no process listening on $port"
+    else
+      print "killing ${port_pids[*]} on port $port"
+      pids+=( "${port_pids[@]}" )
+    fi
+  done
+
+  (( ${#pids[@]} > 0 )) && kill $force "${pids[@]}" 2>/dev/null
+}
+alias kp='killport'
+
+listport() {
+  local -a ports=("$@")
+  if (( ${#ports[@]} == 0 )); then
+    echo "Usage: listport <port> [port...]" >&2
+    return 1
+  fi
+
+  for port in "${ports[@]}"; do
+    if ! [[ "$port" =~ '^[0-9]+$' ]] || (( port < 1 || port > 65535 )); then
+      print -u2 "skipping invalid port: $port"
+      continue
+    fi
+    local out
+    out=$(lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null)
+    [[ -z "$out" ]] && { print "nothing listening on $port"; continue; }
+    print -r -- "--- port $port ---"
+    print -r -- "$out"
+  done
+}
+alias lp='listport'
+
+# ───────────────────────────────────────────────────────────────
+# Smart Tools
+# ───────────────────────────────────────────────────────────────
+eval "$(zoxide init zsh)"
+eval "$(fzf --zsh)"
+eval "$(atuin init zsh)"
+eval "$(direnv hook zsh)"
+
+export FZF_DEFAULT_OPTS="--color=fg:#c0caf5,bg:#1a1b26,hl:#bb9af7 --color=fg+:#c0caf5,bg+:#292e42,hl+:#7dcfff --color=info:#7aa2f7,prompt:#7dcfff,pointer:#ff9e64,marker:#9ece6a --color=spinner:#7dcfff,header:#9ece6a --color=border:#565f89,gutter:#1a1b26 --layout=reverse --height=40% --border=none"
+export FZF_CTRL_T_OPTS="--preview 'bat --color=always {}' --preview-window=right:60%:noborder"
+export FZF_ALT_C_OPTS="--preview 'ls -la {}' --preview-window=right:60%:noborder"
+
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# ───────────────────────────────────────────────────────────────
+# Completion Styling
+# ───────────────────────────────────────────────────────────────
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-Z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu no
+
+zstyle ':fzf-tab:*' fzf-flags --height=40% --layout=reverse --border=none --color=fg:#c0caf5,bg:#1a1b26,hl:#bb9af7 --color=fg+:#c0caf5,bg+:#292e42,hl+:#7dcfff --color=info:#7aa2f7,prompt:#7dcfff,pointer:#ff9e64,marker:#9ece6a --color=spinner:#7dcfff,header:#9ece6a --color=border:#565f89,gutter:#1a1b26
+zstyle ':fzf-tab:*' switch-group '<' '>'
+
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color=always --group-directories-first $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color=always --group-directories-first $realpath'
+zstyle ':fzf-tab:complete:ls:*' fzf-preview 'ls --color=always --group-directories-first $realpath'
+
+# ───────────────────────────────────────────────────────────────
+# Plugin Configuration
+# ───────────────────────────────────────────────────────────────
+ZSH_AUTOSUGGEST_USE_ASYNC=1
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+
+# ───────────────────────────────────────────────────────────────
+# Sourced helpers
+# ───────────────────────────────────────────────────────────────
+[ -f "$HOME/.config/zsh/remote-helpers.zsh" ] && source "$HOME/.config/zsh/remote-helpers.zsh"
+[ -f "$HOME/.config/zsh/meridian.zsh" ] && source "$HOME/.config/zsh/meridian.zsh"
