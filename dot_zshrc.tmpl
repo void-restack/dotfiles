@@ -114,11 +114,12 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # Go
 export PATH="$PATH:/usr/local/go/bin"
 
-# Volta
+{{ if eq .chezmoi.os "darwin" -}}
+# Volta (macOS)
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 
-# pnpm
+# pnpm (macOS)
 export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
@@ -140,7 +141,7 @@ export PATH="$HOME/.opencode/bin:$PATH"
 # Antigravity
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 
-# Java / Android / libpq
+# Java / Android / libpq (Homebrew)
 export JAVA_HOME=$(/usr/libexec/java_home -v 17)
 export ANDROID_HOME="/opt/homebrew/share/android-commandlinetools"
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
@@ -148,6 +149,13 @@ export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 
 ulimit -n 524288
+
+{{ else if eq .chezmoi.os "linux" -}}
+# Cargo
+. "$HOME/.cargo/env" 2>/dev/null || true
+
+ulimit -n 524288
+{{ end -}}
 
 # ───────────────────────────────────────────────────────────────
 # Aliases
@@ -169,9 +177,11 @@ alias cat='bat --paging=never'
 alias find='fd'
 alias grep='rg'
 
+{{ if eq .chezmoi.os "darwin" -}}
 alias ssh='kitty +kitten ssh'
 alias d='kitty +kitten diff'
 alias icat='kitty +kitten icat'
+{{ end -}}
 
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -189,7 +199,11 @@ alias ds='du -sh *(/)'
 alias usage='du -sh * | sort -h'
 
 alias myip='curl -s ifconfig.me'
+{{ if eq .chezmoi.os "darwin" -}}
 alias localip='ipconfig getifaddr en0'
+{{ else if eq .chezmoi.os "linux" -}}
+alias localip='hostname -I | awk "{print \$1}"'
+{{ end -}}
 
 # ───────────────────────────────────────────────────────────────
 # Functions
