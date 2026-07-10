@@ -1,0 +1,20 @@
+---
+- name: Provision a fresh Debian server
+  hosts: "{{ target | default('new_servers') }}"
+  become: true
+  gather_facts: true
+  roles:
+    - base
+    - user
+    - docker
+    - hardening
+    - firewall
+  post_tasks:
+    - name: Print summary
+      ansible.builtin.debug:
+        msg: |
+          Server provisioned!
+          Deploy user: {{ deploy_user }}
+          Docker: installed
+          UFW: enabled (ports {{ ufw_allowed_tcp_ports | join(', ') }} only)
+          SSH: hardened (root login disabled, key-only auth)
