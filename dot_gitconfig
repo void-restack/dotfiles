@@ -1,0 +1,21 @@
+[user]
+	name = void-restack
+	email = rahul@fetcch.xyz
+
+[core]
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	side-by-side = true
+	line-numbers = true
+	syntax-theme = TwoDark
+
+[merge]
+	conflictstyle = diff3
+
+[diff]
+	colorMoved = default
