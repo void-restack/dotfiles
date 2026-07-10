@@ -6,10 +6,34 @@
   roles:
     - base
     - user
-    - docker
-    - hardening
-    - firewall
+    - role: geerlingguy.docker
+    - role: devsec.ssh_hardening
+    - role: geerlingguy.firewall
+  vars:
+    # geerlingguy.docker
+    docker_install_compose_plugin: true
+    docker_users:
+      - "{{ deploy_user }}"
+
+    # devsec.ssh_hardening
+    sshd_permit_root_login: "no"
+    sshd_password_authentication: "no"
+    sshd_max_auth_tries: 3
+    sshd_login_grace_time: 30
+    sshd_allow_users: "{{ deploy_user }}"
+
+    # geerlingguy.firewall
+    firewall_state: started
+    firewall_enabled_at_boot: true
+    firewall_allowed_tcp_ports: "{{ ufw_allowed_tcp_ports }}"
+
   post_tasks:
+    - name: Ensure fail2ban is enabled and running
+      ansible.builtin.systemd:
+        name: fail2ban
+        enabled: true
+        state: started
+
     - name: Print summary
       ansible.builtin.debug:
         msg: |
@@ -18,4 +42,4 @@
           Deploy user: {{ deploy_user }}
           Docker: installed
           UFW: enabled (ports {{ ufw_allowed_tcp_ports | join(', ') }} only)
-          SSH: hardened (root login disabled, key-only auth)
+          SSH: hardened (root login disabled, key-only auth, fail2ban active)

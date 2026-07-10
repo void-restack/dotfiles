@@ -104,6 +104,16 @@ ansible-playbook ansible/playbooks/update-all.yml
 
 The `gcp_compute` dynamic inventory plugin auto-discovers your running GCP instances — no manual inventory maintenance.
 
+### Roles used
+
+| Role | Source | What it does |
+|------|--------|-------------|
+| `base` (custom) | this repo | apt update, essential packages, timezone, swap, auto-updates |
+| `user` (custom) | this repo | deploy user, sudo, SSH authorized keys |
+| `geerlingguy.docker` | Ansible Galaxy | Docker Engine + compose plugin, service management |
+| `devsec.ssh_hardening` | Ansible Galaxy | SSH config hardening (CIS-compliant, InSpec-tested) |
+| `geerlingguy.firewall` | Ansible Galaxy | UFW firewall rules |
+
 ## Daily operations
 
 ```bash
