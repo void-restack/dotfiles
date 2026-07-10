@@ -1,0 +1,21 @@
+# Decrypted age key (never commit)
+key.txt
+
+# Shell-generated
+*.zwc
+.zcompdump*
+
+# History/state
+.zsh_history
+.zsh_sessions/
+.viminfo
+.DS_Store
+
+# Backups
+*.bak
+*.bak[0-9]
+*.tmp
+
+# Chezmoi internal
+.chezmoi.toml
+.chezmoiignore
